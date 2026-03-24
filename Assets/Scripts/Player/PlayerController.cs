@@ -24,6 +24,11 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
 
+        if (rb.interpolation == RigidbodyInterpolation2D.None)
+        {
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate; 
+        }
+
         if (moveAction.action == null)
         {
             defaultMoveAction = new InputAction(name: "Move");
