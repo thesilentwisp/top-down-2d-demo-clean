@@ -17,7 +17,7 @@ public class PlayerFireballAttack : MonoBehaviour
     private InputAction defaultFireAction;
     private float nextFireTime;
     private bool isChanneling;
-    private bool hasFiredThisChannel;
+    private bool isChargeReady;
     private float channelStartTime;
     private bool slowApplied;
     private float cachedMoveSpeed;
@@ -72,23 +72,17 @@ public class PlayerFireballAttack : MonoBehaviour
 
         if (ActiveFireAction.WasReleasedThisFrame())
         {
-            CancelChannel();
+            ReleaseChannel();
             return;
         }
 
-        if (!isChanneling || hasFiredThisChannel)
+        if (!isChanneling)
         {
             return;
         }
 
         float elapsed = Time.time - channelStartTime;
-        if (elapsed >= Mathf.Max(0.05f, channelTimeSeconds))
-        {
-            FireChargedProjectile();
-            hasFiredThisChannel = true;
-            EndChannel();
-            nextFireTime = Time.time + Mathf.Max(0.1f, fireCooldown);
-        }
+        isChargeReady = elapsed >= Mathf.Max(0.05f, channelTimeSeconds);
     }
 
     private void TryStartChannel()
@@ -100,12 +94,18 @@ public class PlayerFireballAttack : MonoBehaviour
 
         channelStartTime = Time.time;
         isChanneling = true;
-        hasFiredThisChannel = false;
+        isChargeReady = false;
         ApplyChannelMoveSlow();
     }
 
-    private void CancelChannel()
+    private void ReleaseChannel()
     {
+        if (isChanneling && isChargeReady && Time.time >= nextFireTime)
+        {
+            FireChargedProjectile();
+            nextFireTime = Time.time + Mathf.Max(0.1f, fireCooldown);
+        }
+
         EndChannel();
     }
 
@@ -122,7 +122,7 @@ public class PlayerFireballAttack : MonoBehaviour
     private void EndChannel()
     {
         isChanneling = false;
-        hasFiredThisChannel = false;
+        isChargeReady = false;
         RemoveChannelMoveSlow();
     }
 
