@@ -76,6 +76,8 @@ public class PlayerController : MonoBehaviour
 
         movementInput = ActiveMoveAction.ReadValue<Vector2>();
         movementInput = Vector2.ClampMagnitude(movementInput, 1f);
+
+        Debug.Log(GetComponent<Health>().CurrentHealth);
     }
 
     private void FixedUpdate()
