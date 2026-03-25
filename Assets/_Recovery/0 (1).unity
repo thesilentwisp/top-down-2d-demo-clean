@@ -226,7 +226,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 6.03
+  orthographic size: 5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -269,7 +269,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3efd6e03e8989f74cbe65c211bd83b49, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollow2D
-  target: {fileID: 1183551682}
+  target: {fileID: 0}
   offset: {x: 0, y: 0, z: -10}
   smoothTime: 0.15
 --- !u!1 &619394800
@@ -1286,20 +1286,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BasicEnemyShooter
   player: {fileID: 1183551682}
-  detectionRadius: 3
   projectilePrefab: {fileID: 8460751051864536015, guid: 295410423ad69504b9f03d9d35c37d92, type: 3}
   muzzle: {fileID: 1478521312}
   projectileDamage: 10
-  bulletsPerBurst: 3
-  timeBetweenShots: 1
-  postTeleportShootDelay: 2
-  teleportDistance: 1
-  teleportDirectionChecks: 12
-  obstacleMask:
+  shootIntervalSeconds: 2
+  moveDistance: 0.5
+  moveDurationSeconds: 0.25
+  postMoveShootDelay: 5
+  wallMask:
     serializedVersion: 2
     m_Bits: 64
-  patrolHalfWidth: 2
-  patrolSpeed: 0.5
 --- !u!61 &1223704611
 BoxCollider2D:
   m_ObjectHideFlags: 0
