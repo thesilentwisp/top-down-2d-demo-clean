@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     private Health health;
     private InputAction defaultMoveAction;
     private Vector2 movementInput;
+    private Vector2 lastNonZeroMove = Vector2.right;
 
     public float MoveSpeed
     {
@@ -21,6 +22,7 @@ public class PlayerController : MonoBehaviour
     }
 
     public Health Health => health;
+    public Vector2 AimDirection => lastNonZeroMove;
 
     private InputAction ActiveMoveAction => moveAction.action ?? defaultMoveAction;
 
@@ -77,7 +79,10 @@ public class PlayerController : MonoBehaviour
         movementInput = ActiveMoveAction.ReadValue<Vector2>();
         movementInput = Vector2.ClampMagnitude(movementInput, 1f);
 
-        Debug.Log(GetComponent<Health>().CurrentHealth);
+        if (movementInput.sqrMagnitude > 0.001f)
+        {
+            lastNonZeroMove = movementInput.normalized;
+        }
     }
 
     private void FixedUpdate()
