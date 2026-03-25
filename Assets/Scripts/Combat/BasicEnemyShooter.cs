@@ -1,9 +1,7 @@
-using TMPro;
 using UnityEngine;
 
-[RequireComponent (typeof(Health))]
-[RequireComponent (typeof(Collider2D))]
-
+[RequireComponent(typeof(Health))]
+[RequireComponent(typeof(Collider2D))]
 public class BasicEnemyShooter : MonoBehaviour
 {
     [Header("Target")]
@@ -17,8 +15,8 @@ public class BasicEnemyShooter : MonoBehaviour
 
     [Header("Reposition")]
     [SerializeField] private float moveDistance = 1.5f;
-    [SerializeField] private float movedurationSeconds = .25f;
-    [SerializeField] private float postMoveShootDelay = .15f;
+    [SerializeField] private float moveDurationSeconds = 0.25f;
+    [SerializeField] private float postMoveShootDelay = 0.15f;
     [SerializeField] private LayerMask wallMask;
 
     private Collider2D enemyCollider;
@@ -35,8 +33,7 @@ public class BasicEnemyShooter : MonoBehaviour
         if (player == null)
         {
             PlayerController foundPlayer = FindAnyObjectByType<PlayerController>();
-
-            if (foundPlayer !=null)
+            if (foundPlayer != null)
             {
                 player = foundPlayer.transform;
             }
@@ -46,6 +43,11 @@ public class BasicEnemyShooter : MonoBehaviour
         {
             muzzle = transform;
         }
+    }
+
+    private void OnEnable()
+    {
+        nextShootTime = Time.time + 0.2f;
     }
 
     private void Update()
@@ -80,8 +82,13 @@ public class BasicEnemyShooter : MonoBehaviour
         Vector2 awayFromPlayer = ((Vector2)transform.position - (Vector2)player.position).normalized;
         if (awayFromPlayer.sqrMagnitude < 0.001f)
         {
+            awayFromPlayer = Random.insideUnitCircle.normalized;
+        }
+
+        if (!TryGetValidMoveTarget(awayFromPlayer, out moveTarget))
+        {
             Vector2 fallback = Quaternion.Euler(0f, 0f, 35f) * awayFromPlayer;
-            if(!TryGetValidMoveTarget(awayFromPlayer, out moveTarget))
+            if (!TryGetValidMoveTarget(fallback, out moveTarget))
             {
                 nextShootTime = Time.time + shootIntervalSeconds;
                 return;
@@ -104,18 +111,26 @@ public class BasicEnemyShooter : MonoBehaviour
             castRadius = Mathf.Max(enemyCollider.bounds.extents.x, enemyCollider.bounds.extents.y, 0.2f);
         }
 
-        RaycastHit2D wallBetween = Physics2D.CircleCast(origin, castRadius, direction, moveDistance, wallMask);
-        if(wallBetween.collider !=null)
+        RaycastHit2D[] castHits = Physics2D.CircleCastAll(origin, castRadius, direction, moveDistance, wallMask);
+        for (int i = 0; i < castHits.Length; i++)
         {
-            validTarget = transform.position;
-            return false;
+            Collider2D hitCollider = castHits[i].collider;
+            if (hitCollider != null && hitCollider != enemyCollider)
+            {
+                validTarget = transform.position;
+                return false;
+            }
         }
 
-        Collider2D blockedAtDestination = Physics2D.OverlapCircle(target, castRadius, wallMask);
-        if (blockedAtDestination !=null)
+        Collider2D[] destinationHits = Physics2D.OverlapCircleAll(target, castRadius, wallMask);
+        for (int i = 0; i < destinationHits.Length; i++)
         {
-            validTarget = transform.position;
-            return false;
+            Collider2D hitCollider = destinationHits[i];
+            if (hitCollider != null && hitCollider != enemyCollider)
+            {
+                validTarget = transform.position;
+                return false;
+            }
         }
 
         validTarget = target;
@@ -125,11 +140,11 @@ public class BasicEnemyShooter : MonoBehaviour
     private void UpdateMove()
     {
         float elapsed = Time.time - moveStartTime;
-        float duration = Mathf.Max(0.01f, movedurationSeconds);
+        float duration = Mathf.Max(0.01f, moveDurationSeconds);
         float t = Mathf.Clamp01(elapsed / duration);
         transform.position = Vector3.Lerp(moveStart, moveTarget, t);
 
-        if (t >=1)
+        if (t >= 1f)
         {
             isMoving = false;
             nextShootTime = Time.time + postMoveShootDelay;

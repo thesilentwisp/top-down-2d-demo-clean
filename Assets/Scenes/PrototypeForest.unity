@@ -1289,10 +1289,10 @@ MonoBehaviour:
   projectilePrefab: {fileID: 8460751051864536015, guid: 295410423ad69504b9f03d9d35c37d92, type: 3}
   muzzle: {fileID: 1478521312}
   projectileDamage: 10
-  shootIntervalSeconds: 3
-  moveDistance: 15
-  movedurationSeconds: 0.25
-  postMoveShootDelay: 2
+  shootIntervalSeconds: 2
+  moveDistance: 0.5
+  moveDurationSeconds: 0.25
+  postMoveShootDelay: 5
   wallMask:
     serializedVersion: 2
     m_Bits: 64
