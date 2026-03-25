@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Health))]
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
@@ -9,6 +10,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private InputActionProperty moveAction;
 
     private Rigidbody2D rb;
+    private Health health;
     private InputAction defaultMoveAction;
     private Vector2 movementInput;
 
@@ -18,11 +20,14 @@ public class PlayerController : MonoBehaviour
         set => moveSpeed = Mathf.Max(0f, value);
     }
 
+    public Health Health => health;
+
     private InputAction ActiveMoveAction => moveAction.action ?? defaultMoveAction;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        health = GetComponent<Health>();
 
         if (rb.interpolation == RigidbodyInterpolation2D.None)
         {
