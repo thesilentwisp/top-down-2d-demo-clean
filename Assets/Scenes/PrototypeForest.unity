@@ -1194,8 +1194,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerFireballAttack
   fireballPrefab: {fileID: 8233014005480821732, guid: 066f127ddd4b0c044992fdd7735c80de, type: 3}
   firePoint: {fileID: 1247763777}
-  fireballDamage: 20
+  fireballDamage: 40
+  channelTimeSeconds: 2
   fireCooldown: 0.3
+  moveSpeedMultiplierWhileChanneling: 0.5
   fireAction:
     m_UseReference: 1
     m_Action:
@@ -1388,11 +1390,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e41763cf7909d574894fc1a8210b2068, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
-  maxHealth: 40
+  maxHealth: 100
   onDeath:
     m_PersistentCalls:
       m_Calls: []
-  destroyOnDeath: 0
+  destroyOnDeath: 1
 --- !u!1 &1247763776
 GameObject:
   m_ObjectHideFlags: 0

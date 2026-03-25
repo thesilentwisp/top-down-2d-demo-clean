@@ -23,6 +23,7 @@ public class PlayerController : MonoBehaviour
 
     public Health Health => health;
     public Vector2 AimDirection => lastNonZeroMove;
+    public bool IsMoving => movementInput.sqrMagnitude > 0.001f;
 
     private InputAction ActiveMoveAction => moveAction.action ?? defaultMoveAction;
 
@@ -33,7 +34,7 @@ public class PlayerController : MonoBehaviour
 
         if (rb.interpolation == RigidbodyInterpolation2D.None)
         {
-            rb.interpolation = RigidbodyInterpolation2D.Interpolate; 
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         }
 
         if (moveAction.action == null)

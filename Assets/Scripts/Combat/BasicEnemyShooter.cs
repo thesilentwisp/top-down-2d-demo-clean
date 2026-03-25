@@ -12,7 +12,7 @@ public class BasicEnemyShooter : MonoBehaviour
     [Header("Attack")]
     [SerializeField] private Projectile projectilePrefab;
     [SerializeField] private Transform muzzle;
-    [SerializeField] private float projectileDamage = 10f;
+    [SerializeField] private int projectileDamage = 10;
     [SerializeField] private int bulletsPerBurst = 3;
     [FormerlySerializedAs("shootIntervalSeconds")]
     [SerializeField] private float timeBetweenShots = 0.5f;
@@ -163,7 +163,7 @@ public class BasicEnemyShooter : MonoBehaviour
     {
         Vector2 dirToPlayer = player.position - muzzle.position;
         Projectile projectile = Instantiate(projectilePrefab, muzzle.position, Quaternion.identity);
-        projectile.Initialize(dirToPlayer, projectileDamage, gameObject);
+        projectile.Initialize(dirToPlayer, Mathf.Max(1, projectileDamage), gameObject);
     }
 
     private void TeleportWithinRange()

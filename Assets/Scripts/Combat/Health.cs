@@ -2,35 +2,34 @@ using UnityEngine;
 using UnityEngine.Events;
 
 [DisallowMultipleComponent]
-
 public class Health : MonoBehaviour, IDamageable
 {
-    [SerializeField] private float maxHealth = 100f;
+    [SerializeField] private int maxHealth = 100;
     [SerializeField] private UnityEvent onDeath;
     [SerializeField] private bool destroyOnDeath;
 
-    public float CurrentHealth { get; private set; }
-    public float MaxHealth => maxHealth;
-    public bool IsAlive => CurrentHealth > 0f;
+    public int CurrentHealth { get; private set; }
+    public int MaxHealth => maxHealth;
+    public bool IsAlive => CurrentHealth > 0;
 
     private void Awake()
     {
-        CurrentHealth = Mathf.Max(1f, maxHealth);
+        CurrentHealth = Mathf.Max(1, maxHealth);
     }
 
     public void ResetHealth()
     {
-        CurrentHealth = Mathf.Max(1f, maxHealth);
+        CurrentHealth = Mathf.Max(1, maxHealth);
     }
 
-    public void TakeDamage(float amount)
+    public void TakeDamage(int amount)
     {
-        if (!IsAlive || amount <= 0f)
+        if (!IsAlive || amount <= 0)
         {
             return;
         }
 
-        CurrentHealth = Mathf.Max(0f, CurrentHealth - amount);
+        CurrentHealth = Mathf.Max(0, CurrentHealth - amount);
 
         if (!IsAlive)
         {
