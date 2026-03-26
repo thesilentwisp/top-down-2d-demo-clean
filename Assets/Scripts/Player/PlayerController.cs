@@ -9,12 +9,28 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private InputActionProperty moveAction;
     [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private Animator animator;
+
+    [Header("Dodge")]
+    [SerializeField] private InputActionProperty dodgeAction;
+    [SerializeField] private float dodgeDistance = 2.25f;
+    [SerializeField] private float dodgeDuration = 0.15f;
+    [SerializeField] private float dodgeCooldown = 0.6f;
+    [SerializeField] private LayerMask dodgeObstacleMask = ~0;
+    [SerializeField] private string dodgeAnimationTrigger = "Dodge";
 
     private Rigidbody2D rb;
     private Health health;
     private InputAction defaultMoveAction;
+    private InputAction defaultDodgeAction;
     private Vector2 movementInput;
     private Vector2 lastNonZeroMove = Vector2.right;
+    private bool isDodging;
+    private float dodgeEndTime;
+    private float nextDodgeTime;
+    private Vector2 dodgeVelocity;
+    private readonly RaycastHit2D[] dodgeHits = new RaycastHit2D[8];
+        
 
     public float MoveSpeed
     {
@@ -25,8 +41,10 @@ public class PlayerController : MonoBehaviour
     public Health Health => health;
     public Vector2 AimDirection => lastNonZeroMove;
     public bool IsMoving => movementInput.sqrMagnitude > 0.001f;
+    public bool IsDodging => isDodging;
 
     private InputAction ActiveMoveAction => moveAction.action ?? defaultMoveAction;
+    private InputAction ActiveDodgeAction => dodgeAction.action ?? defaultDodgeAction;
 
     private void Awake()
     {
@@ -36,6 +54,11 @@ public class PlayerController : MonoBehaviour
         if (spriteRenderer == null)
         {
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        }
+
+        if (animator == null)
+        {
+            GetComponentInChildren<Animator>();
         }
 
         if (rb.interpolation == RigidbodyInterpolation2D.None)
@@ -58,21 +81,31 @@ public class PlayerController : MonoBehaviour
                 .With("Right", "<Keyboard>/rightArrow");
             defaultMoveAction.AddBinding("<Gamepad>/leftStick");
         }
+
+        if (dodgeAction.action == null)
+        {
+            defaultDodgeAction = new InputAction(name: "Dodge");
+            defaultDodgeAction.AddBinding("<Mouse>/rightButton");
+            defaultDodgeAction.AddBinding("<Gamepad>/buttonEast");
+        }
     }
 
     private void OnEnable()
     {
         ActiveMoveAction?.Enable();
+        ActiveDodgeAction?.Enable();
     }
 
     private void OnDisable()
     {
         ActiveMoveAction?.Disable();
+        ActiveDodgeAction?.Disable();
     }
 
     private void OnDestroy()
     {
         defaultMoveAction?.Dispose();
+        defaultDodgeAction?.Dispose();
     }
 
     private void Update()
@@ -90,6 +123,16 @@ public class PlayerController : MonoBehaviour
         {
             lastNonZeroMove = movementInput.normalized;
             UpdateFacingVisual();
+        }
+
+        if (isDodging && Time.time >= dodgeEndTime)
+        {
+            StopDodge();
+        }
+
+        if (!isDodging && ActiveDodgeAction != null && ActiveDodgeAction.WasPressedThisFrame())
+        {
+            TryStartDodge();
         }
     }
 
@@ -110,10 +153,79 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-#if UNITY_6000_0_OR_NEWER
+        if (isDodging)
+        {
+            rb.linearVelocity = dodgeVelocity;
+            return;
+        }
+
         rb.linearVelocity = movementInput * moveSpeed;
-#else
-        rb.velocity = movementInput * moveSpeed;
-#endif
+    }
+
+    private void TryStartDodge()
+    {
+        if (Time.time < nextDodgeTime)
+        {
+            return;
+        }
+
+        Vector2 dodgeDirection = movementInput.sqrMagnitude > 0.001f ? movementInput.normalized : lastNonZeroMove;
+        if (dodgeDirection.sqrMagnitude <= 0/001f)
+        {
+            dodgeDirection = Vector2.right;
+        }
+
+        float allowedDistance = GetAllowedDodgeDistance(dodgeDirection, Mathf.Max(0.05f, dodgeDistance));
+        if (allowedDistance <= 0.02f)
+        {
+            return;
+        }
+
+        float duration = Mathf.Max(0.03f, dodgeDuration);
+        dodgeVelocity = dodgeDirection * (allowedDistance / duration);
+        isDodging = true;
+        dodgeEndTime = Time.time + duration;
+        nextDodgeTime = Time.time + Mathf.Max(duration, dodgeCooldown);
+        movementInput = Vector2.zero;
+
+        if (animator != null && !string.IsNullOrWhiteSpace(dodgeAnimationTrigger))
+        {
+            animator.SetTrigger(dodgeAnimationTrigger);
+        }
+    }
+
+    private void StopDodge()
+    {
+        isDodging = false;
+        dodgeVelocity = Vector2.zero;
+    }
+
+    private float GetAllowedDodgeDistance(Vector2 direction, float intendedDistance)
+    {
+        ContactFilter2D filter = new()
+        {
+            useLayerMask = true,
+            layerMask = dodgeObstacleMask,
+            useTriggers = false
+        };
+
+        int hitcount = rb.Cast(direction, filter, dodgeHits, intendedDistance);
+        if (hitcount <= 0)
+        {
+            return intendedDistance;
+        }
+
+        float nearest = intendedDistance;
+        for (int i = 0; i < hitcount; i++)
+        {
+            float hitDistance = dodgeHits[i].distance;
+            if (hitDistance < nearest)
+            {
+                nearest = hitDistance;
+            }
+        }
+
+        const float skin = 0.05f;
+        return Mathf.Max(0f, nearest - skin);
     }
 }

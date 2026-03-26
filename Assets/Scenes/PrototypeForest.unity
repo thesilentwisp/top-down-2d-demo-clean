@@ -1059,6 +1059,26 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: 0}
   spriteRenderer: {fileID: 0}
+  animator: {fileID: 0}
+  dodgeAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Dodge
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: b87c2f02-6cc5-4410-94b5-1350cec14d27
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  dodgeDistance: 2.25
+  dodgeDuration: 0.15
+  dodgeCooldown: 0.6
+  dodgeObstacleMask:
+    serializedVersion: 2
+    m_Bits: 0
+  dodgeAnimationTrigger: Dodge
 --- !u!212 &1183551684
 SpriteRenderer:
   serializedVersion: 2
