@@ -6,10 +6,10 @@ public class PlayerFireballAttack : MonoBehaviour
 {
     [Header("Attack")]
     [SerializeField] private Projectile fireballPrefab;
-    [SerializeField] private Transform firePoint;
     [SerializeField] private int fireballDamage = 35;
     [SerializeField] private float channelTimeSeconds = 2f;
     [SerializeField] private float fireCooldown = 1.5f;
+    [SerializeField] private float fireballSpawnDistance = 0.75f;
     [SerializeField] private float moveSpeedMultiplierWhileChanneling = 0.5f;
     [SerializeField] private InputActionProperty fireAction;
 
@@ -33,11 +33,6 @@ public class PlayerFireballAttack : MonoBehaviour
             defaultFireAction = new InputAction(name: "Fire");
             defaultFireAction.AddBinding("<Keyboard>/space");
             defaultFireAction.AddBinding("<Gamepad>/rightShoulder");
-        }
-
-        if (firePoint == null)
-        {
-            firePoint = transform;
         }
     }
 
@@ -112,8 +107,9 @@ public class PlayerFireballAttack : MonoBehaviour
     private void FireChargedProjectile()
     {
         Vector2 direction = GetMouseAimDirection();
+        Vector2 spawnPosition = (Vector2)transform.position + direction * Mathf.Max(0.05f, fireballSpawnDistance);
 
-        Projectile projectile = Instantiate(fireballPrefab, firePoint.position, Quaternion.identity);
+        Projectile projectile = Instantiate(fireballPrefab, spawnPosition, Quaternion.identity);
         projectile.Initialize(direction, Mathf.Max(1, fireballDamage), gameObject);
         projectile.ConfigureProjectileInteraction(canDestroyOtherProjectiles: true, canPassThroughProjectiles: true);
     }
@@ -161,7 +157,7 @@ public class PlayerFireballAttack : MonoBehaviour
         Vector2 mouseScreenPos = Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
         Vector3 mouseWorld = cameraToUse.ScreenToWorldPoint(new Vector3(mouseScreenPos.x, mouseScreenPos.y, Mathf.Abs(cameraToUse.transform.position.z)));
 
-        Vector2 direction = mouseWorld - firePoint.position;
+        Vector2 direction = mouseWorld - transform.position;
         if (direction.sqrMagnitude <= 0.001f)
         {
             return playerController != null ? playerController.AimDirection : Vector2.right;
