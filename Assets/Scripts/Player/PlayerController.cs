@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private InputActionProperty moveAction;
+    [SerializeField] private SpriteRenderer spriteRenderer;
 
     private Rigidbody2D rb;
     private Health health;
@@ -31,6 +32,11 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         health = GetComponent<Health>();
+
+        if (spriteRenderer == null)
+        {
+            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        }
 
         if (rb.interpolation == RigidbodyInterpolation2D.None)
         {
@@ -83,7 +89,23 @@ public class PlayerController : MonoBehaviour
         if (movementInput.sqrMagnitude > 0.001f)
         {
             lastNonZeroMove = movementInput.normalized;
+            UpdateFacingVisual();
         }
+    }
+
+    private void UpdateFacingVisual()
+    {
+        if (spriteRenderer == null)
+        {
+            return;
+        }
+
+        if (Mathf.Abs(lastNonZeroMove.x) < 0.01f)
+        {
+            return;
+        }
+
+        spriteRenderer.flipX = lastNonZeroMove.x < 0f;
     }
 
     private void FixedUpdate()

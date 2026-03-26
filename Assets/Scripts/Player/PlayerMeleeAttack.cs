@@ -13,7 +13,6 @@ public class PlayerMeleeAttack : MonoBehaviour
     [SerializeField] private float attackRadius = 0.65f;
     [SerializeField] private float knockbackImpulse = 6f;
     [SerializeField] private LayerMask targetMask;
-    [SerializeField] private Transform attackOrigin;
     [SerializeField] private InputActionProperty attackAction;
 
     private PlayerController playerController;
@@ -31,11 +30,6 @@ public class PlayerMeleeAttack : MonoBehaviour
             defaultAttackAction = new InputAction(name: "Melee Attack");
             defaultAttackAction.AddBinding("<Mouse>/leftButton");
             defaultAttackAction.AddBinding("<Gamepad>/buttonSouth");
-        }
-
-        if (attackOrigin == null)
-        {
-            attackOrigin = transform;
         }
     }
 
@@ -78,7 +72,7 @@ public class PlayerMeleeAttack : MonoBehaviour
    private void PerformMeleeAttack()
     {
         Vector2 facing = playerController != null ? playerController.AimDirection : Vector2.right;
-        Vector2 attackCenter = (Vector2)attackOrigin.position + facing.normalized * Mathf.Max(0.1f, attackRange);
+        Vector2 attackCenter = (Vector2)transform.position + facing.normalized * Mathf.Max(0.1f, attackRange);
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(attackCenter, Mathf.Max(0.05f, attackRadius), targetMask);
         HashSet<GameObject> processedTargets = new();
@@ -134,9 +128,8 @@ public class PlayerMeleeAttack : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        Transform origin = attackOrigin != null ? attackOrigin : transform;
         Vector2 facing = Application.isPlaying && playerController != null ? playerController.AimDirection : Vector2.right;
-        Vector2 attackCenter = (Vector2)origin.position + facing.normalized * Mathf.Max(0.1f, attackRange);
+        Vector2 attackCenter = (Vector2)transform.position + facing.normalized * Mathf.Max(0.1f, attackRange);
 
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(attackCenter, Mathf.Max(0.05f, attackRadius));
