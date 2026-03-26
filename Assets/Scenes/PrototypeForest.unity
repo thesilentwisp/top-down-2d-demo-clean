@@ -1061,7 +1061,7 @@ MonoBehaviour:
   spriteRenderer: {fileID: 0}
   animator: {fileID: 0}
   dodgeAction:
-    m_UseReference: 0
+    m_UseReference: 1
     m_Action:
       m_Name: Dodge
       m_Type: 0
@@ -1072,9 +1072,9 @@ MonoBehaviour:
       m_SingletonActionBindings: []
       m_Flags: 0
     m_Reference: {fileID: 0}
-  dodgeDistance: 2.25
+  dodgeDistance: 1.5
   dodgeDuration: 0.15
-  dodgeCooldown: 0.6
+  dodgeCooldown: 0.5
   dodgeObstacleMask:
     serializedVersion: 2
     m_Bits: 0
