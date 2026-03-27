@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Collider2D))]
 public class Projectile : MonoBehaviour
@@ -6,7 +7,10 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float speed = 8f;
     [SerializeField] private int damage = 10;
     [SerializeField] private float lifetimeSeconds = 5f;
-    [SerializeField] private LayerMask hitMask = ~0;
+    [FormerlySerializedAs("hitMask")]
+    [SerializeField] private LayerMask damageMask = ~0;
+    [SerializeField] private LayerMask destroyOnCollisionMask = ~0;
+    [SerializeField] private LayerMask passThroughMask;
 
     private Vector2 direction;
     private GameObject owner;
@@ -52,11 +56,6 @@ public class Projectile : MonoBehaviour
             return;
         }
 
-        if ((hitMask.value & (1 << other.gameObject.layer)) == 0)
-        {
-            return;
-        }
-
         Projectile otherProjectile = other.GetComponentInParent<Projectile>();
         if (otherProjectile != null)
         {
@@ -71,12 +70,27 @@ public class Projectile : MonoBehaviour
             }
         }
 
-        IDamageable damageable = other.GetComponentInParent<IDamageable>();
-        if (damageable != null)
+        int otherLayerMask = 1 << other.gameObject.layer;
+
+        if ((passThroughMask.value & otherLayerMask) != 0)
         {
-            damageable.TakeDamage(damage);
+            return;
         }
 
-        Destroy(gameObject);
+        bool canDamageThisLayer = (damageMask.value & otherLayerMask) != 0;
+        if (canDamageThisLayer)
+        {
+            IDamageable damageable = other.GetComponentInParent<IDamageable>();
+            if (damageable != null)
+            {
+                damageable.TakeDamage(damage);
+            }
+        }
+
+        bool shouldDestroyOnThisLayer = (destroyOnCollisionMask.value & otherLayerMask) != 0;
+        if (shouldDestroyOnThisLayer)
+        {
+            Destroy(gameObject);
+        }
     }
 }

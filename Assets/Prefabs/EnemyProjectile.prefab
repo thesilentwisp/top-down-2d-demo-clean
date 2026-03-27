@@ -145,9 +145,15 @@ MonoBehaviour:
   speed: 2
   damage: 10
   lifetimeSeconds: 5
-  hitMask:
+  damageMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 64
+  destroyOnCollisionMask:
+    serializedVersion: 2
+    m_Bits: 320
+  passThroughMask:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!50 &6727406402736610046
 Rigidbody2D:
   serializedVersion: 5
