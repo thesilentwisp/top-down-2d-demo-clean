@@ -63,6 +63,7 @@ public class PlayerController : MonoBehaviour
     private Vector2 dashVelocity;
     private Vector2 queuedDashDirection;
     private bool hurdlePhasingEnabled;
+    private bool inputEnabled = true;
 
     private readonly RaycastHit2D[] castHits = new RaycastHit2D[8];
     private readonly Collider2D[] dashDamageHits = new Collider2D[16];
@@ -79,6 +80,30 @@ public class PlayerController : MonoBehaviour
     public bool IsMoving => movementInput.sqrMagnitude > 0.001f;
     public bool IsDodging => isDodging;
     public bool IsDashing => dashPhase != DashPhase.None;
+    public bool InputEnabled => inputEnabled;
+
+    public void SetInputEnabled(bool enabled)
+    {
+        inputEnabled = enabled;
+
+        if (enabled)
+        {
+            return;
+        }
+
+        movementInput = Vector2.zero;
+        rb.linearVelocity = Vector2.zero;
+
+        if (isDodging)
+        {
+            StopDodge();
+        }
+
+        if (IsDashing)
+        { 
+            StopDash();
+        }
+    }
 
     private InputAction ActiveMoveAction => moveAction.action ?? defaultMoveAction;
     private InputAction ActiveDodgeAction => dodgeAction.action ?? defaultDodgeAction;
@@ -131,7 +156,7 @@ public class PlayerController : MonoBehaviour
         if (dashAction.action == null)
         {
             defaultDashAction = new InputAction(name: "Dash Attack");
-            defaultDashAction.AddBinding("<Mouse>/middleButton");
+            defaultDashAction.AddBinding("<Keyboard>/rightShift");
             defaultDashAction.AddBinding("<Keyboard>/leftShift");
             defaultDashAction.AddBinding("<Gamepad>/leftShoulder");
         }
@@ -167,6 +192,11 @@ public class PlayerController : MonoBehaviour
         ReadMovementInput();
         UpdateAbilityState();
 
+        if (!inputEnabled)
+        {
+            return;
+        }
+
         if (CanStartAbility() && ActiveDashAction != null && ActiveDashAction.WasPressedThisFrame())
         {
             TryStartDashWindup();
@@ -180,6 +210,12 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!inputEnabled)
+        {
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
+
         if (dashPhase == DashPhase.Windup)
         {
             rb.linearVelocity = Vector2.zero;
@@ -204,6 +240,12 @@ public class PlayerController : MonoBehaviour
 
     private void ReadMovementInput()
     {
+        if(!inputEnabled)
+        {
+            movementInput = Vector2.zero;
+            return;
+        }
+
         if (ActiveMoveAction == null)
         {
             movementInput = Vector2.zero;
